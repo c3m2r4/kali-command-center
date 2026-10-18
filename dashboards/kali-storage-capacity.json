@@ -40,7 +40,7 @@
         {
           "expr": "100 * sum by (mount_point,instance) (netdata_disk_space_GiB_average{dimension=\"used\"}) / sum by (mount_point,instance) (netdata_disk_space_GiB_average{dimension=~\"used|avail\"})",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -100,7 +100,7 @@
         {
           "expr": "netdata_disk_space_GiB_average{dimension=\"avail\"}",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -160,7 +160,7 @@
         {
           "expr": "kali_cc_project_size_bytes",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -203,7 +203,7 @@
     },
     {
       "id": 4,
-      "title": "Project size sample available",
+      "title": "Filesystem inode utilization",
       "description": "",
       "type": "table",
       "datasource": {
@@ -218,14 +218,14 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_project_size_known",
+          "expr": "100 * sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=\"used\"}) / sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=~\"used|avail\"})",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "percent",
           "color": {
             "mode": "palette-classic"
           },
@@ -278,9 +278,9 @@
       },
       "targets": [
         {
-          "expr": "netdata_disk_io_KiB_persec_average",
+          "expr": "abs(netdata_disk_io_KiB_persec_average) * 1024",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -319,6 +319,125 @@
           "mode": "multi",
           "sort": "desc"
         }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Project size scan status",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "targets": [
+        {
+          "expr": "kali_cc_project_size_known",
+          "refId": "A",
+          "legendFormat": "{{project}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
+      }
+    },
+    {
+      "id": 7,
+      "title": "Projected root filesystem used in 7 days",
+      "description": "Linear projection from the last six hours of Netdata used-space samples. Treat as a trend estimate, not a capacity guarantee.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "targets": [
+        {
+          "expr": "predict_linear(netdata_disk_space_GiB_average{mount_point=\"/\",dimension=\"used\"}[6h], 604800)",
+          "refId": "A",
+          "legendFormat": "{{mount_point}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "gibibytes",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 190
+              },
+              {
+                "color": "red",
+                "value": 210
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Root storage alerts",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "targets": [
+        {
+          "expr": "ALERTS{alertname=~\"KaliRootFilesystem.*\"}",
+          "refId": "A",
+          "legendFormat": "{{alertname}} {{alertstate}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true
       }
     }
   ],
