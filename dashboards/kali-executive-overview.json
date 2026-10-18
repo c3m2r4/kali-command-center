@@ -407,7 +407,7 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_systemd_failed_units or vector(0)",
+          "expr": "max(kali_cc_systemd_failed_units) or vector(0)",
           "refId": "A",
           "legendFormat": "Failed units"
         }
