@@ -42,7 +42,9 @@ _cache = {'until': 0.0, 'body': b''}
 _refresh_guard = threading.Lock()
 _git_cache: dict[str, tuple[float, str, bool, float]] = {}
 _size_cache: dict[str, tuple[float, int, bool]] = {}
-_size_refresh_lock = threading.Lock()
+_size_queue_lock = threading.Lock()
+_size_pending: set[str] = set()
+_size_worker_active = False
 _last_success: dict[str, float] = {}
 _last_failure: dict[str, float] = {}
 
@@ -92,33 +94,45 @@ def project_size(path: str) -> tuple[int, bool]:
     if item is None:
         # Return unknown immediately; the one-filesystem metadata scan runs outside scrape.
         _size_cache[path] = (now, 0, False)
-        threading.Thread(target=refresh_project_size, args=(path,), daemon=True).start()
+        schedule_project_size_refresh(path)
         return 0, False
-    # A stale sample remains visible while the background refresh runs.
+    # Keep the last completed sample visible while the sequential worker refreshes it.
     if now - item[0] >= SIZE_REFRESH_SECONDS:
         _size_cache[path] = (now, item[1], item[2])
-        threading.Thread(target=refresh_project_size, args=(path,), daemon=True).start()
+        schedule_project_size_refresh(path)
     return item[1], item[2]
 
-def refresh_project_size(path: str) -> None:
-    if not _size_refresh_lock.acquire(blocking=False):
-        return
-    try:
-        _refresh_project_size_locked(path)
-    finally:
-        _size_refresh_lock.release()
+def schedule_project_size_refresh(path: str) -> None:
+    global _size_worker_active
+    with _size_queue_lock:
+        _size_pending.add(path)
+        if _size_worker_active:
+            return
+        _size_worker_active = True
+    threading.Thread(target=refresh_project_sizes, daemon=True).start()
 
-def _refresh_project_size_locked(path: str) -> None:
+def refresh_project_sizes() -> None:
+    global _size_worker_active
+    while True:
+        with _size_queue_lock:
+            if not _size_pending:
+                _size_worker_active = False
+                return
+            path = sorted(_size_pending)[0]
+            _size_pending.remove(path)
+        refresh_project_size(path)
+
+def refresh_project_size(path: str) -> None:
     now = time.time()
     if not path or not Path(path).is_dir():
         result = (now, 0, False)
     else:
         # du reads filesystem metadata only; it does not open or execute project files.
-        r = run(['/usr/bin/du', '-sb', '--one-file-system', '--', path], timeout=120)
         try:
+            r = run(['/usr/bin/du', '-sb', '--one-file-system', '--', path], timeout=60)
             size = int(r.stdout.split('\t', 1)[0]) if r.returncode == 0 else 0
             result = (time.time(), size, r.returncode == 0)
-        except (ValueError, IndexError):
+        except (ValueError, IndexError, subprocess.TimeoutExpired, OSError):
             result = (time.time(), 0, False)
     _size_cache[path] = result
 
