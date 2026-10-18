@@ -1,0 +1,126 @@
+schema_version: 1
+discovery_roots:
+- /var/www
+additional_projects:
+- name: aegis
+  path: /home/camara/Aegis
+  technology: Python
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: floci
+  path: /mnt/elements/floci
+  technology: Docker Compose
+  kind: lab
+  monitoring: configured
+  containers:
+  - floci-ui
+  - floci-floci-1
+  - floci-floci-gcp-1
+  - floci-floci-az-1
+  - floci-proxy
+  checks:
+  - name: Floci UI
+    type: http
+    target: http://127.0.0.1:4500/
+- name: mythic
+  path: /home/camara/tools/Mythic
+  technology: Docker Compose
+  kind: security lab
+  monitoring: configured
+  containers:
+  - tcp
+  - merlin
+  - poseidon
+  - websocket
+  - apollo
+  - http
+  - athena
+  - mythic_nginx
+  - mythic_jupyter
+  - mythic_react
+  - mythic_graphql
+  - mythic_server
+  - mythic_rabbitmq
+  - mythic_postgres
+  - mythic_documentation
+  checks:
+  - name: Mythic web listener
+    type: tcp
+    target: 127.0.0.1:7443
+- name: goad
+  path: /home/camara/GOAD
+  technology: VMware/Vagrant lab
+  kind: security lab
+  monitoring: configured
+  containers: []
+  checks: []
+- name: monitoring-grafana
+  path: ''
+  technology: Kubernetes
+  kind: infrastructure
+  monitoring: configured
+  containers: []
+  checks:
+  - name: Grafana API
+    type: http
+    target: http://127.0.0.1:13000/api/health
+- name: monitoring-prometheus
+  path: ''
+  technology: Kubernetes
+  kind: infrastructure
+  monitoring: configured
+  containers: []
+  checks:
+  - name: Prometheus health
+    type: http
+    target: http://127.0.0.1:19090/-/healthy
+- name: kubernetes-dashboard
+  path: ''
+  technology: Kubernetes
+  kind: infrastructure
+  monitoring: configured
+  containers: []
+  checks:
+  - name: Kubernetes Dashboard TCP
+    type: tcp
+    target: 127.0.0.1:8443
+- name: portainer
+  path: ''
+  technology: Docker
+  kind: infrastructure
+  monitoring: configured
+  containers:
+  - portainer
+  checks:
+  - name: Portainer HTTPS listener
+    type: tcp
+    target: 127.0.0.1:9443
+- name: hackafrica
+  path: /var/www/HackAfrica
+  technology: Python/Compose
+  kind: application
+  monitoring: configured
+  containers:
+  - hackafrica-api-1
+  - hackafrica-worker-1
+  - hackafrica-redis-1
+  - hackafrica-mailpit-1
+  checks:
+  - name: HackAfrica Redis
+    type: tcp
+    target: 127.0.0.1:6381
+  - name: HackAfrica Mailpit
+    type: http
+    target: http://127.0.0.1:8025/
+policy:
+  probe_interval_seconds: 30
+  http_timeout_seconds: 3
+  tcp_timeout_seconds: 2
+  project_size_refresh_seconds: 900
+  git_refresh_seconds: 300
+  allowed_probe_addresses:
+  - 127.0.0.1
+  - ::1
+  execute_project_code: false

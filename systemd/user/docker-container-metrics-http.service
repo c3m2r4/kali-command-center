@@ -1,0 +1,22 @@
+[Unit]
+Description=Private Docker container metrics endpoint for Prometheus
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/camara/.local/bin/docker-container-exporter.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=default.target

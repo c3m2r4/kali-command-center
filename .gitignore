@@ -1,0 +1,11 @@
+# Runtime secrets and local state
+.env
+*.env
+secrets/
+backups/
+*.sqlite
+*.db
+*.tar
+*.tar.gz
+__pycache__/
+*.py[cod]
