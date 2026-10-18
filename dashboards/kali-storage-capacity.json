@@ -204,7 +204,7 @@
     {
       "id": 4,
       "title": "Filesystem inode utilization",
-      "description": "",
+      "description": "Inode utilization for filesystems with a reported non-zero inode total. Filesystems that do not report inode capacity are omitted.",
       "type": "table",
       "datasource": {
         "type": "prometheus",
@@ -218,7 +218,7 @@
       },
       "targets": [
         {
-          "expr": "100 * sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=\"used\"}) / sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=~\"used|avail\"})",
+          "expr": "(100 * sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=\"used\"}) / sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=~\"used|avail\"})) and on (mount_point,instance) (sum by (mount_point,instance) (netdata_disk_inodes_inodes_average{dimension=~\"used|avail\"}) > 0)",
           "refId": "A",
           "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
