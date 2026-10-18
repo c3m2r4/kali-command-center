@@ -8,7 +8,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "refresh": "30s",
   "time": {
     "from": "now-6h",
@@ -22,92 +22,160 @@
   },
   "panels": [
     {
-      "id": 1,
-      "title": "Container state",
-      "description": "",
-      "type": "state-timeline",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "targets": [
-        {
-          "expr": "docker_container_running",
-          "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
       "id": 2,
       "title": "Running containers",
-      "description": "",
+      "description": "Count of containers currently running.",
       "type": "stat",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
       },
       "targets": [
         {
-          "expr": "sum(docker_container_running)",
+          "expr": "sum(docker_container_running) or vector(0)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": true,
+          "format": "time_series"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
+          "decimals": 0,
           "color": {
-            "mode": "palette-classic"
+            "mode": "value"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Stopped containers",
+      "type": "stat",
+      "description": "Number of containers not currently running.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count(docker_container_running == 0) or vector(0)",
+          "refId": "A",
+          "instant": true,
+          "format": "time_series",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Docker metrics age",
+      "description": "Seconds since the local Docker exporter produced a snapshot. Green \u2264120s, warning after 120s, red after 300s.",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "time() - kali_cc_metrics_snapshot_timestamp_seconds",
+          "refId": "A",
+          "legendFormat": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -118,14 +186,183 @@
               },
               {
                 "color": "yellow",
-                "value": 70
+                "value": 120
               },
               {
                 "color": "red",
-                "value": 90
+                "value": 300
               }
             ]
           }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 9,
+      "title": "Docker daemon",
+      "type": "stat",
+      "description": "Availability of the Docker daemon to the local Docker exporter.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "kali_cc_docker_daemon_available",
+          "refId": "A",
+          "instant": true,
+          "format": "time_series",
+          "legendFormat": ""
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Unavailable"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Available"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      }
+    },
+    {
+      "id": 1,
+      "title": "Container running state",
+      "description": "Running=1 (green), stopped=0 (red). Series are grouped by container name so old container IDs do not create duplicate rows.",
+      "type": "state-timeline",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "max by (name) (docker_container_running)",
+          "refId": "A",
+          "legendFormat": "{{name}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": false,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "max": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Stopped"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Running"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -136,55 +373,47 @@
           "placement": "bottom"
         },
         "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+          "mode": "single"
+        },
+        "showValue": "never",
+        "mergeValues": true
       }
     },
     {
       "id": 3,
       "title": "Container CPU usage",
-      "description": "",
+      "description": "CPU percentage per container, grouped by name across container recreations. Values may exceed 100% on multi-core containers.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
+        "x": 12,
+        "y": 4,
         "w": 12,
-        "x": 0,
-        "y": 8
+        "h": 8
       },
       "targets": [
         {
-          "expr": "docker_container_cpu_percent",
+          "expr": "max by (name) (docker_container_cpu_percent)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{name}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": false,
+          "format": "time_series"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
+          "decimals": 2,
+          "min": 0,
           "color": {
             "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
           }
         },
         "overrides": []
@@ -203,29 +432,86 @@
     },
     {
       "id": 4,
-      "title": "Container memory use",
-      "description": "",
+      "title": "Container memory usage",
+      "description": "Current memory use per container in bytes, grouped by name across container recreations.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
+        "x": 0,
+        "y": 12,
         "w": 12,
-        "x": 12,
-        "y": 8
+        "h": 8
       },
       "targets": [
         {
-          "expr": "docker_container_memory_usage_bytes",
+          "expr": "max by (name) (docker_container_memory_usage_bytes)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{name}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": false,
+          "format": "time_series"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "bytes",
+          "decimals": 2,
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Container memory limit usage",
+      "type": "timeseries",
+      "description": "Memory use as a percentage of each container limit, grouped by name.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (name) (docker_container_memory_percent)",
+          "refId": "A",
+          "legendFormat": "{{name}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "min": 0,
           "color": {
             "mode": "palette-classic"
           },
@@ -263,121 +549,44 @@
     },
     {
       "id": 5,
-      "title": "Restarting or unhealthy containers",
-      "description": "",
+      "title": "Containers requiring attention",
+      "description": "Container inventory rows where Docker reports a state other than running, including the state and status text.",
       "type": "table",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 16
+        "y": 20,
+        "w": 24,
+        "h": 8
       },
       "targets": [
         {
           "expr": "docker_container_info{state!=\"running\"}",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{name}} / {{state}}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": true,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          }
+          "decimals": 0
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 6,
-      "title": "Docker metrics scrape",
-      "description": "",
-      "type": "stat",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "targets": [
-        {
-          "expr": "up{job=\"node-exporter\"}",
-          "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
         }
       }
     }
