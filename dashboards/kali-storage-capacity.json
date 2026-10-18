@@ -32,10 +32,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 0
+        "y": 0,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -92,10 +92,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 0
+        "y": 0,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -152,10 +152,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 8
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -212,10 +212,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 8
+        "y": 8,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -272,10 +272,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 16
+        "y": 16,
+        "w": 24,
+        "h": 8
       },
       "targets": [
         {
@@ -331,10 +331,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 40
+        "y": 24,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -363,10 +363,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 40
+        "y": 24,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -419,10 +419,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 48
+        "y": 32,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -450,10 +450,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 48
+        "y": 32,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -489,10 +489,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 0,
-        "y": 56
+        "y": 40,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {
@@ -528,10 +528,10 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
         "x": 12,
-        "y": 56
+        "y": 40,
+        "w": 12,
+        "h": 8
       },
       "targets": [
         {

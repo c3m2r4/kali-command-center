@@ -375,7 +375,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 8,
         "w": 12,
         "h": 9
       },
@@ -473,7 +473,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 4,
+        "y": 8,
         "w": 12,
         "h": 9
       },
@@ -572,7 +572,7 @@
       "gridPos": {
         "x": 0,
         "y": 17,
-        "w": 12,
+        "w": 24,
         "h": 8
       },
       "id": 3,
@@ -1165,7 +1165,7 @@
       "id": 25,
       "type": "stat",
       "title": "Host metrics snapshot age",
-      "description": "Age of the host collector\u2019s latest snapshot. Values above two minutes indicate stale host metrics.",
+      "description": "Age of the host collector’s latest snapshot. Values above two minutes indicate stale host metrics.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
