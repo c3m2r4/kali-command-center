@@ -9,7 +9,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 41,
-  "version": 1,
+  "version": 3,
   "refresh": "30s",
   "time": {
     "from": "now-6h",
@@ -38,14 +38,14 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Prometheus contains bounded aggregate event categories only. It does not contain statement text, account names, client IPs, object names, or independently verified actor identity. Detailed normalized records are available in [DBCC](http://127.0.0.1:18765/). The current MariaDB audit plugin settings were observed OFF; stored events include historical data and must not be treated as current complete coverage."
+        "content": "Prometheus exposes bounded DAM event categories and cumulative collector counters; it excludes statement text, account names, client IPs, and object names. The DBCC scrape and collector heartbeat show endpoint reachability and recent collector-reported activity, but **do not prove MariaDB audit logging is enabled now or that collection is complete**. Audit settings were applied at runtime and must be checked after MariaDB restarts. Detailed normalized records are available in [DBCC](http://127.0.0.1:18765/)."
       }
     },
     {
       "id": 2,
-      "title": "DBCC scrape status",
+      "title": "DBCC scrape target",
       "type": "stat",
-      "description": "",
+      "description": "SCRAPED proves only that Prometheus can read the DBCC metrics endpoint; it does not verify the MariaDB audit plugin.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -58,27 +58,46 @@
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 1
+                "color": "red",
+                "value": 0
               },
               {
-                "color": "red",
-                "value": 2
+                "color": "green",
+                "value": 1
               }
             ]
           },
-          "unit": "short"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "TARGET ABSENT",
+                  "color": "gray"
+                },
+                "0": {
+                  "text": "FAILED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "SCRAPED",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -98,7 +117,7 @@
       },
       "targets": [
         {
-          "expr": "up{job=\"dbcc-dam-metrics\"}",
+          "expr": "min(up{job=\"dbcc-dam-metrics\"}) or vector(-1)",
           "refId": "A",
           "legendFormat": ""
         }
@@ -106,9 +125,9 @@
     },
     {
       "id": 3,
-      "title": "Stored normalized events",
+      "title": "Normalized events stored (total)",
       "type": "stat",
-      "description": "",
+      "description": "Cumulative DBCC count; this is not limited to the dashboard time range.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -121,6 +140,7 @@
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
             "mode": "palette-classic"
           },
@@ -128,20 +148,22 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
           },
-          "unit": "short"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -161,7 +183,7 @@
       },
       "targets": [
         {
-          "expr": "dbcc_dam_events_stored{job=\"dbcc-dam-metrics\"}",
+          "expr": "sum(dbcc_dam_events_stored{job=\"dbcc-dam-metrics\"}) or vector(-1)",
           "refId": "A",
           "legendFormat": ""
         }
@@ -171,7 +193,7 @@
       "id": 4,
       "title": "Collector heartbeat age",
       "type": "stat",
-      "description": "",
+      "description": "Seconds since the last collector heartbeat. Green below 60s, amber 60–89s, red at 90s or more. This does not verify plugin state.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -184,8 +206,10 @@
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "s",
+          "decimals": 1,
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -195,16 +219,26 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 1
+                "color": "orange",
+                "value": 60
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 90
               }
             ]
           },
-          "unit": "s"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -224,7 +258,7 @@
       },
       "targets": [
         {
-          "expr": "time()-dbcc_dam_collector_heartbeat_timestamp_seconds{job=\"dbcc-dam-metrics\"}",
+          "expr": "max(time() - dbcc_dam_collector_heartbeat_timestamp_seconds{job=\"dbcc-dam-metrics\"}) or vector(-1)",
           "refId": "A",
           "legendFormat": ""
         }
@@ -232,9 +266,9 @@
     },
     {
       "id": 5,
-      "title": "Current source heartbeat signal (not source verification)",
+      "title": "Collector heartbeat current (not source verification)",
       "type": "stat",
-      "description": "",
+      "description": "The exporter reports whether a collector heartbeat is current (<90 seconds). This does not prove the MariaDB audit plugin is active or events are complete.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -247,27 +281,46 @@
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 1
+                "color": "red",
+                "value": 0
               },
               {
-                "color": "red",
-                "value": 2
+                "color": "green",
+                "value": 1
               }
             ]
           },
-          "unit": "short"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                },
+                "0": {
+                  "text": "STALE",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "CURRENT",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -287,7 +340,7 @@
       },
       "targets": [
         {
-          "expr": "dbcc_dam_source_configured{job=\"dbcc-dam-metrics\"}",
+          "expr": "min(dbcc_dam_source_configured{job=\"dbcc-dam-metrics\"}) or vector(-1)",
           "refId": "A",
           "legendFormat": ""
         }
@@ -295,7 +348,7 @@
     },
     {
       "id": 6,
-      "title": "Observed events by bounded category",
+      "title": "Observed event rate by category",
       "type": "timeseries",
       "description": "",
       "datasource": {
@@ -347,7 +400,7 @@
       },
       "targets": [
         {
-          "expr": "sum by(event_type,outcome)(rate(dbcc_dam_events_total{engine=\"mariadb\"}[5m]))",
+          "expr": "sum by(event_type,outcome)(rate(dbcc_dam_events_total{engine=\"mariadb\",job=\"dbcc-dam-metrics\"}[5m]))",
           "refId": "A",
           "legendFormat": "{{event_type}} / {{outcome}}"
         }
@@ -355,9 +408,9 @@
     },
     {
       "id": 7,
-      "title": "Observed events in selected period",
+      "title": "Events by category in selected period",
       "type": "timeseries",
-      "description": "",
+      "description": "Rounded counter increases over the selected dashboard time range, grouped by event type.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -407,7 +460,7 @@
       },
       "targets": [
         {
-          "expr": "sum by(event_type)(increase(dbcc_dam_events_total{engine=\"mariadb\"}[$__range]))",
+          "expr": "round(sum by(event_type)(increase(dbcc_dam_events_total{engine=\"mariadb\",job=\"dbcc-dam-metrics\"}[$__range])))",
           "refId": "A",
           "legendFormat": "{{event_type}}"
         }
@@ -433,7 +486,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Open [DBCC](http://127.0.0.1:18765/) for normalized event records and coverage metadata. Original MariaDB audit messages, when enabled, contain raw statements in the host journal and require restricted access/retention."
+        "content": "The host journal can retain original MariaDB audit statements; restrict access and set retention deliberately. DBCC normalizes records and redacts SQL literals before storage. A current exporter scrape and heartbeat do not verify plugin state, source completeness, actor identity, or event outcomes. Prometheus history is limited by cluster retention."
       }
     }
   ],

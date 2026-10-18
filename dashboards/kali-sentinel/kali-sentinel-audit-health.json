@@ -9,7 +9,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-6h",
@@ -38,14 +38,14 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "A healthy scrape proves only that the exporter endpoint responds. It does not prove the upstream audit source is enabled, complete, or attributable. Missing data is a monitoring gap."
+        "content": "**Interpretation:** Prometheus currently receives the DBCC metrics endpoint and DAM collector heartbeat. These signals confirm exporter reachability and recent collector activity, but do not verify that MariaDB audit logging is still enabled after a database restart, prove event completeness/identity, or make the local hash chain immutable. Normalized event records redact SQL literals; the host journal may retain original statement text. Missing metrics mean a coverage gap, not zero activity."
       }
     },
     {
-      "id": 2,
-      "title": "Prometheus target health",
-      "type": "table",
-      "description": "",
+      "id": 9,
+      "title": "Prometheus targets",
+      "type": "stat",
+      "description": "Number of scrape targets currently represented by the up metric. No data means target telemetry is absent.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -53,13 +53,69 @@
       "gridPos": {
         "x": 0,
         "y": 4,
-        "w": 12,
-        "h": 9
+        "w": 4,
+        "h": 4
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "count(up)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Unhealthy targets",
+      "type": "stat",
+      "description": "Scrape targets with up=0. No data means no target series; check Prometheus before interpreting zero.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -69,16 +125,389 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "red",
                 "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "(count(up == 0) or vector(0)) and (count(up) > 0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "DBCC scrape target",
+      "type": "stat",
+      "description": "SCRAPED confirms only that Prometheus can read the DBCC metrics endpoint. -1 means the target series is absent.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           },
-          "unit": "short"
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "TARGET ABSENT",
+                  "color": "gray"
+                },
+                "0": {
+                  "text": "FAILED",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "SCRAPED",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "min(up{job=\"dbcc-dam-metrics\"}) or vector(-1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "DAM collector heartbeat",
+      "type": "stat",
+      "description": "The exporter reports whether a collector heartbeat is current (<90s); this does not verify MariaDB audit-plugin state.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                },
+                "0": {
+                  "text": "STALE",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "CURRENT",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "min(dbcc_dam_source_configured{job=\"dbcc-dam-metrics\"}) or vector(-1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Collector heartbeat age",
+      "type": "stat",
+      "description": "Elapsed time since the collector heartbeat. Green <60s, amber 60–89s, red >=90s.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "max(time() - dbcc_dam_collector_heartbeat_timestamp_seconds{job=\"dbcc-dam-metrics\"}) or vector(-1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "DAM events stored (total)",
+      "type": "stat",
+      "description": "Cumulative records stored by the collector metric. No series is shown as NO DATA, not zero.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 4,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "NO DATA",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "sum(dbcc_dam_events_stored{job=\"dbcc-dam-metrics\"}) or vector(-1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Prometheus target health",
+      "type": "table",
+      "description": "Current scrape state for each configured Prometheus target; UP means Prometheus scraped it successfully.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -87,265 +516,59 @@
         "cellHeight": "sm",
         "footer": {
           "show": false
-        }
+        },
+        "sortBy": [
+          {
+            "displayName": "Status",
+            "desc": false
+          }
+        ]
       },
       "targets": [
         {
           "expr": "up",
           "refId": "A",
-          "legendFormat": "{{job}} / {{instance}}"
+          "instant": true,
+          "range": false,
+          "format": "table"
         }
-      ]
-    },
-    {
-      "id": 3,
-      "title": "Unhealthy target count",
-      "type": "stat",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 4,
-        "w": 6,
-        "h": 5
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto"
-      },
-      "targets": [
+      ],
+      "transformations": [
         {
-          "expr": "count(up==0) or vector(0)",
-          "refId": "A",
-          "legendFormat": ""
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "title": "DBCC scrape status",
-      "type": "stat",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 4,
-        "w": 6,
-        "h": 5
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short"
+          "id": "labelsToFields",
+          "options": {}
         },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto"
-      },
-      "targets": [
         {
-          "expr": "up{job=\"dbcc-dam-metrics\"}",
-          "refId": "A",
-          "legendFormat": ""
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "title": "DBCC collector heartbeat age",
-      "type": "stat",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 9,
-        "w": 6,
-        "h": 4
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "s"
+          "id": "merge",
+          "options": {}
         },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto"
-      },
-      "targets": [
         {
-          "expr": "time()-dbcc_dam_collector_heartbeat_timestamp_seconds{job=\"dbcc-dam-metrics\"}",
-          "refId": "A",
-          "legendFormat": ""
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "title": "Collector source heartbeat signal (not MariaDB audit state)",
-      "type": "stat",
-      "description": "",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "x": 18,
-        "y": 9,
-        "w": 6,
-        "h": 4
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "dbcc_dam_source_configured{job=\"dbcc-dam-metrics\"}",
-          "refId": "A",
-          "legendFormat": ""
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "container": true
+            },
+            "indexByName": {
+              "job": 0,
+              "namespace": 1,
+              "service": 2,
+              "pod": 3,
+              "endpoint": 4,
+              "instance": 5,
+              "Value": 6
+            },
+            "renameByName": {
+              "job": "Job",
+              "namespace": "Namespace",
+              "service": "Service",
+              "pod": "Pod",
+              "endpoint": "Endpoint",
+              "instance": "Target",
+              "Value": "Status"
+            }
+          }
         }
       ]
     },
@@ -353,21 +576,22 @@
       "id": 7,
       "title": "Active firing alerts",
       "type": "table",
-      "description": "",
+      "description": "Current firing alert instances. Details shown depend on labels supplied by each alert rule.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
-        "y": 13,
+        "y": 19,
         "w": 24,
-        "h": 8
+        "h": 9
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -377,16 +601,12 @@
                 "value": null
               },
               {
-                "color": "yellow",
-                "value": 1
-              },
-              {
                 "color": "red",
-                "value": 2
+                "value": 1
               }
             ]
           },
-          "unit": "short"
+          "mappings": []
         },
         "overrides": []
       },
@@ -401,13 +621,62 @@
         {
           "expr": "ALERTS{alertstate=\"firing\",severity!=\"none\"}",
           "refId": "A",
-          "legendFormat": "{{severity}} / {{alertname}}"
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "alertstate": true,
+              "cluster": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "pod": true,
+              "service": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "severity": 1,
+              "project": 2,
+              "namespace": 3,
+              "exported_container": 4,
+              "process_name": 5,
+              "local_port": 6,
+              "Value": 7
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "severity": "Severity",
+              "project": "Project",
+              "namespace": "Namespace",
+              "exported_container": "Container",
+              "process_name": "Process",
+              "local_port": "Port",
+              "Value": "Firing"
+            }
+          }
         }
       ]
     },
     {
       "id": 8,
-      "title": "Known gaps",
+      "title": "Coverage and operational gaps",
       "type": "text",
       "datasource": {
         "type": "prometheus",
@@ -415,7 +684,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 21,
+        "y": 28,
         "w": 24,
         "h": 5
       },
@@ -425,7 +694,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "MariaDB audit plugin logging is currently OFF; auditd rules and Wazuh coverage remain unverified; Loki/Alloy and database exporters are absent; Prometheus storage is ephemeral. Host journal usage is significant and persistent log retention needs a capacity plan."
+        "content": "**Verify after MariaDB restarts:** audit settings were applied at runtime; this dashboard cannot prove the audit plugin remains enabled or that every source event was captured. The DBCC heartbeat and event counter reflect collector-reported telemetry, not authenticated actor/outcome evidence. Auditd/Wazuh coverage is not established here. The host journal can contain raw SQL statement text; normalized DBCC records redact SQL literals. Prometheus retention depends on cluster configuration."
       }
     }
   ],

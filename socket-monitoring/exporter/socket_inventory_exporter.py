@@ -220,15 +220,18 @@ class InventoryCollector:
                 value.setdefault("baseline_initialized", False)
                 value.setdefault("listeners", {})
                 value.setdefault("events", [])
-                listeners = value.get("listeners", {})
-                if listeners and all(str(key).count(":") == 1 for key in listeners):
-                    # Upgrade the old protocol:port-only baseline without generating false change events.
-                    value["listeners"] = {key_for_listener(row): row for row in listeners.values()
-                                           if isinstance(row, dict) and all(k in row for k in ("protocol", "local_port", "local_address"))}
+                version = int(value.get("schema_version", 1))
+                if version < 2:
+                    # Old snapshots collapsed multiple bind addresses under one port key.
+                    # Reset once to avoid turning the richer baseline into false new-port alerts.
+                    value["baseline_initialized"] = False
+                    value["listeners"] = {}
+                    value["events"] = []
+                value["schema_version"] = 2
                 return value
         except (OSError, json.JSONDecodeError):
             pass
-        return {"baseline_initialized": False, "listeners": {}, "events": []}
+        return {"schema_version": 2, "baseline_initialized": False, "listeners": {}, "events": []}
 
     def _write_state(self) -> None:
         self.state_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)

@@ -53,6 +53,13 @@ backup_resource endpoints kali-socket-inventory
 backup_resource servicemonitors.monitoring.coreos.com kali-socket-inventory
 backup_resource prometheusrules.monitoring.coreos.com kali-command-center
 backup_resource configmap kali-sentinel-sockets
+backup_resource configmap kali-sentinel-linux-network-stack
+backup_resource configmap kali-sentinel-appsec
+backup_resource configmap kali-sentinel-audit-health
+backup_resource configmap kali-sentinel-dam
+backup_resource configmap kali-sentinel-db-fleet
+backup_resource configmap kali-sentinel-overview
+backup_resource configmap kali-sentinel-file-integrity
 if docker inspect devsecops-control-plane >/dev/null 2>&1; then
   node_ip="$(docker inspect devsecops-control-plane --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')"
   test -n "$node_ip"
@@ -62,4 +69,25 @@ kubectl apply -f "$repo_dir/alerts/kali-command-center-rules.yaml"
 kubectl -n default create configmap kali-sentinel-sockets --from-file=kali-sentinel-sockets.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-sockets.json" --dry-run=client -o yaml | kubectl apply -f -
 kubectl -n default label configmap kali-sentinel-sockets grafana_dashboard=1 --overwrite
 kubectl -n default annotate configmap kali-sentinel-sockets grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-linux-network-stack --from-file=linux-network-stack-node-exporter.json="$repo_dir/dashboards/kali-sentinel/linux-network-stack-node-exporter.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-linux-network-stack grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-linux-network-stack grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-appsec --from-file=kali-sentinel-appsec.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-appsec.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-appsec grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-appsec grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-audit-health --from-file=kali-sentinel-audit-health.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-audit-health.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-audit-health grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-audit-health grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-dam --from-file=kali-sentinel-dam.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-dam.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-dam grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-dam grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-db-fleet --from-file=kali-sentinel-db-fleet.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-db-fleet.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-db-fleet grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-db-fleet grafana_folder='07 - Kali Sentinel' --overwrite
 echo 'Deployment applied. Check scrape target and metadata status in Grafana.'
+kubectl -n default create configmap kali-sentinel-overview --from-file=kali-sentinel-overview.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-overview.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-overview grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-overview grafana_folder='07 - Kali Sentinel' --overwrite
+kubectl -n default create configmap kali-sentinel-file-integrity --from-file=kali-sentinel-file-integrity.json="$repo_dir/dashboards/kali-sentinel/kali-sentinel-file-integrity.json" --dry-run=client -o yaml | kubectl apply -f -
+kubectl -n default label configmap kali-sentinel-file-integrity grafana_dashboard=1 --overwrite
+kubectl -n default annotate configmap kali-sentinel-file-integrity grafana_folder='07 - Kali Sentinel' --overwrite

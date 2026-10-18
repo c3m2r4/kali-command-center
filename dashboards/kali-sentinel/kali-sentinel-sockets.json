@@ -113,7 +113,7 @@
     },
     {
       "id": 1,
-      "title": "TCP listening sockets",
+      "title": "TCP LISTEN",
       "description": "Current TCP listeners from ss -ltnup.",
       "type": "stat",
       "datasource": {
@@ -140,18 +140,14 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -220,18 +216,14 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -273,7 +265,7 @@
     },
     {
       "id": 3,
-      "title": "Unique listening ports",
+      "title": "Unique ports",
       "description": "",
       "type": "stat",
       "datasource": {
@@ -300,18 +292,14 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -369,7 +357,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "count(count by (process_name,pid) (kali_socket_inventory_last_seen_timestamp_seconds{process_name!=\"unavailable\"}))",
+          "expr": "count(count by (process_name,pid) (kali_socket_inventory_last_seen_timestamp_seconds{process_name!=\"unavailable\"})) or vector(-1)",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -380,18 +368,14 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -402,7 +386,18 @@
             "fillOpacity": 15,
             "showPoints": "never",
             "spanNulls": false
-          }
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "Unavailable",
+                  "color": "gray"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -433,7 +428,7 @@
     },
     {
       "id": 5,
-      "title": "Loopback-bound services",
+      "title": "Loopback services",
       "description": "",
       "type": "stat",
       "datasource": {
@@ -460,18 +455,14 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
               }
             ]
           },
@@ -513,7 +504,7 @@
     },
     {
       "id": 6,
-      "title": "Wildcard-bound services",
+      "title": "Wildcard services",
       "description": "",
       "type": "stat",
       "datasource": {
@@ -550,7 +541,7 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "yellow",
                 "value": 1
               }
             ]
@@ -673,7 +664,7 @@
     },
     {
       "id": 8,
-      "title": "Disappeared listeners (15m)",
+      "title": "Disappeared (15m)",
       "description": "",
       "type": "stat",
       "datasource": {
@@ -763,7 +754,7 @@
       "gridPos": {
         "x": 0,
         "y": 4,
-        "w": 4,
+        "w": 3,
         "h": 4
       },
       "targets": [
@@ -841,7 +832,7 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 4,
+        "x": 3,
         "y": 4,
         "w": 3,
         "h": 4
@@ -866,11 +857,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "green",
                 "value": 1
               }
             ]
@@ -882,7 +873,22 @@
             "fillOpacity": 15,
             "showPoints": "never",
             "spanNulls": false
-          }
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Failed",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "Scraped",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -895,7 +901,7 @@
         },
         "orientation": "auto",
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
         "showPercentChange": false,
@@ -921,7 +927,7 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 7,
+        "x": 6,
         "y": 4,
         "w": 3,
         "h": 4
@@ -946,11 +952,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "yellow",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "green",
                 "value": 1
               }
             ]
@@ -962,7 +968,22 @@
             "fillOpacity": 15,
             "showPoints": "never",
             "spanNulls": false
-          }
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Unavailable",
+                  "color": "yellow"
+                },
+                "1": {
+                  "text": "Available",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -975,7 +996,7 @@
         },
         "orientation": "auto",
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
         "showPercentChange": false,
@@ -1001,7 +1022,7 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 10,
+        "x": 9,
         "y": 4,
         "w": 3,
         "h": 4
@@ -1081,16 +1102,16 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 13,
+        "x": 15,
         "y": 4,
-        "w": 5,
+        "w": 4,
         "h": 6
       },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (protocol) (kali_socket_inventory_sockets)",
-          "legendFormat": "",
+          "legendFormat": "{{protocol}}",
           "instant": true,
           "range": false,
           "format": "time_series"
@@ -1100,7 +1121,7 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1161,26 +1182,26 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 18,
+        "x": 19,
         "y": 4,
-        "w": 6,
+        "w": 5,
         "h": 6
       },
       "targets": [
         {
           "refId": "A",
           "expr": "count by (process_name,local_port) (kali_socket_inventory_last_seen_timestamp_seconds{socket_state=\"LISTEN\"})",
-          "legendFormat": "",
+          "legendFormat": "{{process_name}} : {{local_port}}",
           "instant": true,
           "range": false,
-          "format": "time_series"
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1213,7 +1234,7 @@
           ],
           "fields": ""
         },
-        "orientation": "auto",
+        "orientation": "horizontal",
         "textMode": "auto",
         "colorMode": "value",
         "graphMode": "area",
@@ -1228,8 +1249,42 @@
           "mode": "single",
           "sort": "none"
         },
-        "showHeader": true
-      }
+        "showHeader": true,
+        "xField": "Process",
+        "showValue": "always",
+        "groupWidth": 0.7,
+        "barWidth": 0.95,
+        "stacking": "none"
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "process_name": 0,
+              "local_port": 1,
+              "Value": 2
+            },
+            "renameByName": {
+              "process_name": "Process",
+              "local_port": "Port",
+              "Value": "Listener count"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 15,
@@ -1253,14 +1308,14 @@
           "legendFormat": "",
           "instant": true,
           "range": false,
-          "format": "time_series"
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "thresholds": {
             "mode": "absolute",
@@ -1293,7 +1348,7 @@
           ],
           "fields": ""
         },
-        "orientation": "auto",
+        "orientation": "horizontal",
         "textMode": "auto",
         "colorMode": "value",
         "graphMode": "area",
@@ -1308,8 +1363,40 @@
           "mode": "single",
           "sort": "none"
         },
-        "showHeader": true
-      }
+        "showHeader": true,
+        "xField": "Interface",
+        "showValue": "always",
+        "groupWidth": 0.7,
+        "barWidth": 0.95,
+        "stacking": "none"
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "interface": 0,
+              "Value": 1
+            },
+            "renameByName": {
+              "interface": "Interface",
+              "Value": "Listeners"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 16,
@@ -1409,7 +1496,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "kali_socket_listener_change_timestamp_seconds{change=\"new\"}",
+          "expr": "kali_socket_listener_change{change=\"new\"}",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -1480,7 +1567,59 @@
             "desc": false
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "change": 0,
+              "protocol": 1,
+              "socket_state": 2,
+              "local_address": 3,
+              "local_port": 4,
+              "peer_address": 5,
+              "peer_port": 6,
+              "process_name": 7,
+              "pid": 8,
+              "interface": 9,
+              "exposure": 10,
+              "application_name": 11,
+              "container_name": 12,
+              "availability": 13
+            },
+            "renameByName": {
+              "change": "Change",
+              "protocol": "Protocol",
+              "socket_state": "State",
+              "local_address": "Local address",
+              "local_port": "Local port",
+              "peer_address": "Peer address",
+              "peer_port": "Peer port",
+              "process_name": "Process",
+              "pid": "PID",
+              "interface": "Interface",
+              "exposure": "Exposure",
+              "application_name": "Application",
+              "container_name": "Container",
+              "availability": "Availability",
+              "Value": "Observed"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 18,
@@ -1500,7 +1639,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "kali_socket_inventory_last_seen_timestamp_seconds{exposure=\"wildcard\"}",
+          "expr": "kali_socket_inventory_last_seen_timestamp_seconds{exposure=\"wildcard\"} * 1000",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -1509,7 +1648,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "dateTimeAsIso",
           "color": {
             "mode": "thresholds"
           },
@@ -1541,7 +1680,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "browser_url"
+              "options": "Verified browser URL"
             },
             "properties": [
               {
@@ -1571,7 +1710,60 @@
             "desc": false
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "protocol": 0,
+              "socket_state": 1,
+              "local_address": 2,
+              "local_port": 3,
+              "peer_address": 4,
+              "peer_port": 5,
+              "process_name": 6,
+              "pid": 7,
+              "interface": 8,
+              "exposure": 9,
+              "application_name": 10,
+              "browser_url": 11,
+              "container_name": 12,
+              "availability": 13,
+              "Value": 14
+            },
+            "renameByName": {
+              "protocol": "Protocol",
+              "socket_state": "State",
+              "local_address": "Local address",
+              "local_port": "Local port",
+              "peer_address": "Peer address",
+              "peer_port": "Peer port",
+              "process_name": "Process",
+              "pid": "PID",
+              "interface": "Interface",
+              "exposure": "Exposure",
+              "application_name": "Application",
+              "browser_url": "Verified browser URL",
+              "container_name": "Container",
+              "availability": "Availability",
+              "Value": "Last seen"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 19,
@@ -1662,7 +1854,38 @@
             "desc": false
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "expected_service": 0,
+              "protocol": 1,
+              "local_port": 2,
+              "Value": 3
+            },
+            "renameByName": {
+              "expected_service": "Expected service",
+              "protocol": "Protocol",
+              "local_port": "Port",
+              "Value": "Available"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 20,
@@ -1682,7 +1905,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "kali_socket_inventory_last_seen_timestamp_seconds{protocol=~\"$protocol\",local_port=~\"$port\",process_name=~\"$process\",local_address=~\"$address\",exposure=~\"$exposure\"}",
+          "expr": "kali_socket_inventory_last_seen_timestamp_seconds{protocol=~\"$protocol\",local_port=~\"$port\",process_name=~\"$process\",local_address=~\"$address\",exposure=~\"$exposure\"} * 1000",
           "legendFormat": "",
           "instant": true,
           "range": false,
@@ -1723,7 +1946,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "browser_url"
+              "options": "Verified browser URL"
             },
             "properties": [
               {
@@ -1753,7 +1976,60 @@
             "desc": false
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "protocol": 0,
+              "socket_state": 1,
+              "local_address": 2,
+              "local_port": 3,
+              "peer_address": 4,
+              "peer_port": 5,
+              "process_name": 6,
+              "pid": 7,
+              "interface": 8,
+              "exposure": 9,
+              "application_name": 10,
+              "browser_url": 11,
+              "container_name": 12,
+              "availability": 13,
+              "Value": 14
+            },
+            "renameByName": {
+              "protocol": "Protocol",
+              "socket_state": "State",
+              "local_address": "Local address",
+              "local_port": "Local port",
+              "peer_address": "Peer address",
+              "peer_port": "Peer port",
+              "process_name": "Process",
+              "pid": "PID",
+              "interface": "Interface",
+              "exposure": "Exposure",
+              "application_name": "Application",
+              "browser_url": "Verified browser URL",
+              "container_name": "Container",
+              "availability": "Availability",
+              "Value": "Last seen"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 102,
@@ -1765,9 +2041,9 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 34,
+        "y": 24,
         "w": 12,
-        "h": 9
+        "h": 10
       },
       "targets": [
         {
@@ -1781,13 +2057,16 @@
       "fieldConfig": {
         "defaults": {
           "unit": "short",
-          "custom": {}
+          "custom": {},
+          "color": {
+            "mode": "palette-classic"
+          }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "browser_url"
+              "options": "Verified URL"
             },
             "properties": [
               {
@@ -1818,7 +2097,40 @@
           }
         ]
       },
-      "description": "HEAD probes to verified HTTP(S) URLs only; redirects are not followed and TLS certificate validation is enabled. A 3xx/4xx/5xx response means the endpoint answered; status_code is included for context."
+      "description": "HEAD probes to verified HTTP(S) URLs only; redirects are not followed and TLS certificate validation is enabled. A 3xx/4xx/5xx response means the endpoint answered; status_code is included for context.",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "application_name": 0,
+              "local_port": 1,
+              "browser_url": 2,
+              "status_code": 3,
+              "Value": 4
+            },
+            "renameByName": {
+              "application_name": "Application",
+              "local_port": "Port",
+              "browser_url": "Verified URL",
+              "status_code": "HTTP status",
+              "Value": "Available"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 103,
@@ -1837,7 +2149,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "kali_socket_listener_change_timestamp_seconds",
+          "expr": "kali_socket_listener_change_timestamp_seconds * 1000",
           "instant": true,
           "range": false,
           "format": "table"
@@ -1846,7 +2158,10 @@
       "fieldConfig": {
         "defaults": {
           "unit": "dateTimeAsIso",
-          "custom": {}
+          "custom": {},
+          "color": {
+            "mode": "palette-classic"
+          }
         },
         "overrides": []
       },
@@ -1859,7 +2174,54 @@
             "desc": true
           }
         ]
-      }
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "change": 0,
+              "protocol": 1,
+              "socket_state": 2,
+              "local_address": 3,
+              "local_port": 4,
+              "process_name": 5,
+              "pid": 6,
+              "interface": 7,
+              "exposure": 8,
+              "application_name": 9,
+              "availability": 10,
+              "Value": 11
+            },
+            "renameByName": {
+              "change": "Change",
+              "protocol": "Protocol",
+              "socket_state": "State",
+              "local_address": "Local address",
+              "local_port": "Local port",
+              "process_name": "Process",
+              "pid": "PID",
+              "interface": "Interface",
+              "exposure": "Exposure",
+              "application_name": "Application",
+              "availability": "Availability",
+              "Value": "Change time"
+            }
+          }
+        }
+      ]
     },
     {
       "id": 104,
@@ -1871,7 +2233,7 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 13,
+        "x": 12,
         "y": 4,
         "w": 3,
         "h": 4
@@ -1900,7 +2262,22 @@
                 "value": 1
               }
             ]
-          }
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Initializing",
+                  "color": "yellow"
+                },
+                "1": {
+                  "text": "Ready",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -1913,7 +2290,7 @@
         },
         "orientation": "auto",
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "area",
         "justifyMode": "auto",
         "showPercentChange": false

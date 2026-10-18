@@ -9,7 +9,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-6h",
@@ -30,7 +30,7 @@
         "x": 0,
         "y": 0,
         "w": 24,
-        "h": 4
+        "h": 3
       },
       "fieldConfig": {
         "defaults": {},
@@ -38,28 +38,85 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "Current checks establish reachability and some HTTP response status/latency. They do not identify individual request paths, users, or authentication outcomes unless an application log source explicitly records them. No centralized Loki/Alloy pipeline is configured."
+        "content": "**Coverage:** endpoint checks show reachability, HTTP response codes, and latency; Kubernetes metrics show container restarts; Prometheus supplies active alert signals. These do not reveal request paths, authenticated users, authorization outcomes, WAF detections, or API audit events. No centralized Loki/Alloy log pipeline is configured. A missing metric is not evidence of zero activity; use the monitored-check and exporter status panels to confirm coverage."
       }
     },
     {
-      "id": 2,
-      "title": "Reachability by discovered check",
-      "type": "table",
-      "description": "",
+      "id": 7,
+      "title": "Monitored checks",
+      "type": "stat",
+      "description": "Current checks matching the dashboard filters. No data means the exporter series is absent.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
-        "y": 4,
-        "w": 24,
-        "h": 8
+        "y": 3,
+        "w": 4,
+        "h": 4
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "short",
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "count(kali_cc_health_check_up{project=~\"$project\",check=~\"$check\",type=~\"$type\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Failing checks",
+      "type": "stat",
+      "description": "Checks reporting unavailable (0). Read alongside Monitored checks; no telemetry stays No data.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 5,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -69,16 +126,274 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "(sum(kali_cc_health_check_up{project=~\"$project\",check=~\"$check\",type=~\"$type\"} == 0) or vector(0)) and (count(kali_cc_health_check_up{project=~\"$project\",check=~\"$check\",type=~\"$type\"}) > 0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "HTTP 5xx checks",
+      "type": "stat",
+      "description": "Count of HTTP checks returning a server error (status >= 500). No telemetry stays No data.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 10,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "(count(kali_cc_health_check_status_code{project=~\"$project\",check=~\"$check\",type=\"http\"} >= 500) or vector(0)) and (count(kali_cc_health_check_status_code{project=~\"$project\",check=~\"$check\",type=\"http\"}) > 0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Container restarts / 1h",
+      "type": "stat",
+      "description": "Total Kubernetes container restarts observed during the last hour.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 15,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
                 "value": 1
               },
               {
                 "color": "red",
-                "value": 2
+                "value": 5
               }
             ]
           },
-          "unit": "short"
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(kube_pod_container_status_restarts_total[1h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Active alert instances",
+      "type": "stat",
+      "description": "Current firing Prometheus alert instances, across severities.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "expr": "count(ALERTS{alertstate=\"firing\",severity!=\"none\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Reachability by discovered check",
+      "type": "table",
+      "description": "UP means the configured endpoint responded according to its check type. HTTP status is separate below.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 24,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -87,28 +402,77 @@
         "cellHeight": "sm",
         "footer": {
           "show": false
-        }
+        },
+        "sortBy": [
+          {
+            "displayName": "Status",
+            "desc": false
+          }
+        ]
       },
       "targets": [
         {
-          "expr": "kali_cc_health_check_up",
+          "expr": "kali_cc_health_check_up{project=~\"$project\",check=~\"$check\",type=~\"$type\"}",
           "refId": "A",
-          "legendFormat": "{{project}} / {{check}}"
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "cluster": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "pod": true,
+              "service": true
+            },
+            "indexByName": {
+              "project": 0,
+              "check": 1,
+              "type": 2,
+              "target": 3,
+              "Value": 4
+            },
+            "renameByName": {
+              "project": "Project",
+              "check": "Check",
+              "type": "Check type",
+              "target": "Endpoint",
+              "Value": "Status"
+            }
+          }
         }
       ]
     },
     {
       "id": 3,
-      "title": "HTTP status codes",
+      "title": "HTTP response codes by check",
       "type": "timeseries",
-      "description": "",
+      "description": "HTTP status codes are response metadata; they do not indicate authentication or authorization success.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "x": 0,
-        "y": 12,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -117,24 +481,16 @@
           "color": {
             "mode": "palette-classic"
           },
+          "unit": "short",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "blue",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
-          },
-          "unit": "short"
+          }
         },
         "overrides": []
       },
@@ -151,7 +507,7 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_health_check_status_code{type=\"http\"}",
+          "expr": "kali_cc_health_check_status_code{project=~\"$project\",check=~\"$check\",type=~\"$type\"}",
           "refId": "A",
           "legendFormat": "{{project}} / {{check}}"
         }
@@ -161,14 +517,14 @@
       "id": 4,
       "title": "Health-check latency",
       "type": "timeseries",
-      "description": "",
+      "description": "Endpoint response latency reported by configured checks, in seconds.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "x": 12,
-        "y": 12,
+        "y": 16,
         "w": 12,
         "h": 8
       },
@@ -177,6 +533,8 @@
           "color": {
             "mode": "palette-classic"
           },
+          "unit": "s",
+          "decimals": 3,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -185,7 +543,7 @@
                 "value": null
               },
               {
-                "color": "yellow",
+                "color": "orange",
                 "value": 1
               },
               {
@@ -193,8 +551,7 @@
                 "value": 2
               }
             ]
-          },
-          "unit": "s"
+          }
         },
         "overrides": []
       },
@@ -211,7 +568,7 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_health_check_response_seconds",
+          "expr": "kali_cc_health_check_response_seconds{project=~\"$project\",check=~\"$check\",type=~\"$type\"}",
           "refId": "A",
           "legendFormat": "{{project}} / {{check}}"
         }
@@ -219,7 +576,7 @@
     },
     {
       "id": 5,
-      "title": "Container restarts",
+      "title": "Container restarts (last hour)",
       "type": "timeseries",
       "description": "",
       "datasource": {
@@ -228,7 +585,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 20,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -279,16 +636,16 @@
     },
     {
       "id": 6,
-      "title": "Firing alerts by severity",
+      "title": "Firing alert instances by severity",
       "type": "timeseries",
-      "description": "",
+      "description": "Active Prometheus alert series grouped by their configured severity.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "x": 12,
-        "y": 20,
+        "y": 24,
         "w": 12,
         "h": 8
       },
@@ -336,10 +693,190 @@
           "legendFormat": "{{severity}}"
         }
       ]
+    },
+    {
+      "id": 12,
+      "title": "Current firing alert details",
+      "type": "table",
+      "description": "Active alert instances with their labels; available detail depends on the emitting rule.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        },
+        "sortBy": [
+          {
+            "displayName": "severity",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "ALERTS{alertstate=\"firing\",severity!=\"none\"}",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "alertstate": true,
+              "cluster": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "pod": true,
+              "service": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "severity": 1,
+              "project": 2,
+              "namespace": 3,
+              "exported_container": 4,
+              "process_name": 5,
+              "local_port": 6,
+              "Value": 7
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "severity": "Severity",
+              "project": "Project",
+              "namespace": "Namespace",
+              "exported_container": "Container",
+              "process_name": "Process",
+              "local_port": "Port",
+              "Value": "Firing"
+            }
+          }
+        }
+      ]
     }
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "project",
+        "label": "Project",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(kali_cc_health_check_up, project)",
+        "definition": "label_values(kali_cc_health_check_up, project)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      },
+      {
+        "name": "check",
+        "label": "Check",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(kali_cc_health_check_up{project=~\"$project\"}, check)",
+        "definition": "label_values(kali_cc_health_check_up{project=~\"$project\"}, check)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      },
+      {
+        "name": "type",
+        "label": "Type",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(kali_cc_health_check_up{project=~\"$project\",check=~\"$check\"}, type)",
+        "definition": "label_values(kali_cc_health_check_up{project=~\"$project\",check=~\"$check\"}, type)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "options": [],
+        "sort": 1
+      }
+    ]
   },
   "annotations": {
     "list": [

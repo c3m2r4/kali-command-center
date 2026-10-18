@@ -118,13 +118,13 @@ spec:
         description: The exporter is reachable but the ss inventory command failed.
         runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
     - alert: KaliUnexpectedListeningPort
-      expr: kali_socket_listener_change{job="kali-socket-inventory",change="new",protocol="tcp"} == 1
+      expr: kali_socket_listener_change{job="kali-socket-inventory",change="new",protocol=~"tcp|udp"} unless on(protocol,local_port) (kali_socket_listener_expected_up{job="kali-socket-inventory"} == 1)
       for: 1m
       labels:
         severity: warning
       annotations:
-        summary: A new TCP listening port was detected
-        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) opened TCP port {{ $labels.local_port }} on {{ $labels.local_address }}.'
+        summary: A new unexpected listening endpoint was detected
+        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) is listening on {{ $labels.protocol }} port {{ $labels.local_port }} at {{ $labels.local_address }}.'
         runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
     - alert: KaliImportantListenerDisappeared
       expr: kali_socket_listener_expected_up{job="kali-socket-inventory"} == 0
@@ -142,7 +142,7 @@ spec:
         severity: critical
       annotations:
         summary: A new wildcard-bound TCP listener needs exposure review
-        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) newly bound TCP port {{ $labels.local_port }} to {{ $labels.local_address }}.'
+        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) newly observed wildcard-bound TCP port {{ $labels.local_port }} at {{ $labels.local_address }}.'
         runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
     - alert: KaliSocketInventoryTruncated
       expr: kali_socket_inventory_truncated{job="kali-socket-inventory"} == 1
