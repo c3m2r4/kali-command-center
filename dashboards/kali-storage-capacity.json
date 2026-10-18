@@ -339,7 +339,7 @@
         {
           "expr": "kali_cc_project_size_known",
           "refId": "A",
-          "legendFormat": "{{project}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -371,7 +371,7 @@
         {
           "expr": "predict_linear(netdata_disk_space_GiB_average{mount_point=\"/\",dimension=\"used\"}[6h], 604800)",
           "refId": "A",
-          "legendFormat": "{{mount_point}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {
@@ -427,7 +427,7 @@
         {
           "expr": "ALERTS{alertname=~\"KaliRootFilesystem.*\"}",
           "refId": "A",
-          "legendFormat": "{{alertname}} {{alertstate}}"
+          "legendFormat": "{{mount_point}} {{device}} {{dimension}} {{project}}"
         }
       ],
       "fieldConfig": {

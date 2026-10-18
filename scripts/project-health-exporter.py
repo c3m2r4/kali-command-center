@@ -130,7 +130,8 @@ def refresh_project_size(path: str) -> None:
         # du reads filesystem metadata only; it does not open or execute project files.
         try:
             r = run(['/usr/bin/du', '-sb', '--one-file-system', '--', path], timeout=60)
-            size = int(r.stdout.split('\t', 1)[0]) if r.returncode == 0 else 0
+            size = int(r.stdout.split('\t', 1)[0]) if r.stdout.strip() else 0
+            # du can report an accessible partial size when permissions block some files; expose it but mark unknown.
             result = (time.time(), size, r.returncode == 0)
         except (ValueError, IndexError, subprocess.TimeoutExpired, OSError):
             result = (time.time(), 0, False)
