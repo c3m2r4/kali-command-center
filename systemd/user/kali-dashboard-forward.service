@@ -1,0 +1,16 @@
+[Unit]
+Description=Loopback Kubernetes Dashboard port forward for kind-devsecops
+After=default.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+ExecStart=/usr/bin/kubectl --context kind-devsecops -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 8443:443 --address 127.0.0.1
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+[Install]
+WantedBy=default.target

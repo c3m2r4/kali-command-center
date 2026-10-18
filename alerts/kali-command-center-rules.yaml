@@ -1,0 +1,92 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kali-command-center
+  namespace: default
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: kali-command-center.host
+    interval: 30s
+    rules:
+    - alert: KaliNetdataMetricsUnavailable
+      expr: kali_cc_netdata_scrape_success == 0
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali host Netdata metrics fetch is failing
+        description: The local publisher cannot fetch filtered Netdata metrics over host loopback.
+    - alert: KaliNodeExporterMetricsTargetDown
+      expr: up{job="node-exporter"} == 0
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali node-exporter textfile metrics source is down
+        description: Prometheus cannot scrape the node-exporter target that exposes Docker and project metrics.
+    - alert: KaliProjectMetricsStale
+      expr: time() - kali_cc_metrics_snapshot_timestamp_seconds > 180
+      for: 3m
+      labels:
+        severity: warning
+      annotations:
+        summary: Project metrics snapshot is stale
+        description: The local project metrics publisher has not refreshed its ConfigMap for three minutes.
+    - alert: KaliHostCpuSustainedHigh
+      expr: sum(netdata_system_cpu_percentage_average{chart="system.cpu",dimension!="idle",dimension!="guest",dimension!="guest_nice"}) > 85
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali host CPU usage is sustained above 85 percent
+        description: CPU usage has exceeded the warning threshold for ten minutes.
+    - alert: KaliHostMemoryPressure
+      expr: netdata_system_memory_some_pressure_percentage_average{dimension="some 300"} > 10
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali host memory pressure is sustained
+        description: PSI memory stall pressure over the five-minute window exceeds ten percent.
+    - alert: KaliRootFilesystemLowSpace
+      expr: netdata_disk_space_GiB_average{mount_point="/",dimension="avail"} < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali root filesystem has less than 10 GiB free
+        description: Free space on the root filesystem is below the warning threshold.
+    - alert: KaliRootFilesystemLowInodes
+      expr: netdata_disk_inodes_inodes_average{mount_point="/",dimension="avail"} < 100000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kali root filesystem has fewer than 100000 free inodes
+        description: Free inodes on the root filesystem are below the warning threshold.
+    - alert: KaliRegisteredHealthCheckFailing
+      expr: kali_cc_health_check_up == 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: A configured local health check is failing
+        description: '{{ $labels.project }} / {{ $labels.check }} has failed for at least five minutes.'
+    - alert: KaliConfiguredContainerNotRunning
+      expr: kali_cc_container_running == 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: A registered container is not running
+        description: '{{ $labels.project }} container {{ $labels.container }} is not running.'
+    - alert: KaliProjectStateDegraded
+      expr: kali_cc_project_state{state="degraded"} == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: A registered project is degraded
+        description: '{{ $labels.project }} has a failing local health check or restarting container.'

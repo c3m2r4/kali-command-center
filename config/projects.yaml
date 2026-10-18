@@ -1,6 +1,56 @@
 schema_version: 1
 discovery_roots:
 - /var/www
+projects:
+- name: CTFd
+  path: /var/www/CTFd
+  technology: Python
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: cdc
+  path: /var/www/cdc
+  technology: PHP/Node.js
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: html
+  path: /var/www/html
+  technology: Static web
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: muhammed-camara
+  path: /var/www/muhammed-camara
+  technology: Static site
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: noftdigital
+  path: /var/www/noftdigital
+  technology: Python/Django
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: ocd-mindmaps
+  path: /var/www/ocd-mindmaps
+  technology: Static/Node.js
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
+- name: wwcg
+  path: /var/www/wwcg
+  technology: PHP/Node.js
+  kind: application
+  monitoring: unconfigured
+  containers: []
+  checks: []
 additional_projects:
 - name: aegis
   path: /home/camara/Aegis

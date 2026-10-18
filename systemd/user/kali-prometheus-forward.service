@@ -1,0 +1,16 @@
+[Unit]
+Description=Loopback Prometheus port forward for kind-devsecops
+After=default.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+ExecStart=/usr/bin/kubectl --context kind-devsecops -n default port-forward svc/monitoring-kube-prometheus-prometheus 19090:9090 --address 127.0.0.1
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+[Install]
+WantedBy=default.target

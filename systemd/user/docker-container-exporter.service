@@ -1,10 +1,10 @@
 [Unit]
-Description=Private Docker container metrics endpoint for Prometheus
+Description=Publish read-only Docker container metrics to Prometheus textfile collector
 After=default.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/camara/.local/bin/docker-container-exporter.py
+ExecStart=/usr/bin/python3 /home/camara/.local/bin/docker-container-metrics-publisher.py
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=true
@@ -17,6 +17,9 @@ ProtectControlGroups=true
 RestrictAddressFamilies=AF_UNIX AF_INET
 LockPersonality=true
 MemoryDenyWriteExecute=true
+MemoryMax=384M
+CPUQuota=50%
+TasksMax=32
 
 [Install]
 WantedBy=default.target
