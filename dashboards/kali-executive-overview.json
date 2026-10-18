@@ -8,7 +8,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-6h",
@@ -40,7 +40,7 @@
         {
           "expr": "sum by (instance) (netdata_system_cpu_percentage_average{dimension!=\"idle\",dimension!=\"guest\",dimension!=\"guest_nice\"})",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{instance}}"
         }
       ],
       "fieldConfig": {
@@ -84,7 +84,7 @@
     {
       "id": 2,
       "title": "Memory available",
-      "description": "",
+      "description": "Estimated available memory: free RAM plus cache and buffers (MiB).",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -98,9 +98,9 @@
       },
       "targets": [
         {
-          "expr": "netdata_system_ram_MiB_average",
+          "expr": "sum(netdata_system_ram_MiB_average{dimension=~\"free|cached|buffers\"})",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "Available"
         }
       ],
       "fieldConfig": {
@@ -113,16 +113,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "red"
               },
               {
                 "color": "yellow",
-                "value": 70
+                "value": 2048
               },
               {
-                "color": "red",
-                "value": 90
+                "color": "green",
+                "value": 4096
               }
             ]
           }
@@ -160,7 +159,7 @@
         {
           "expr": "100 * sum by (mount_point,instance) (netdata_disk_space_GiB_average{dimension=\"used\"}) / sum by (mount_point,instance) (netdata_disk_space_GiB_average{dimension=~\"used|avail\"})",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{mount_point}}"
         }
       ],
       "fieldConfig": {
@@ -218,9 +217,9 @@
       },
       "targets": [
         {
-          "expr": "sum(docker_container_running)",
+          "expr": "sum(docker_container_running == 1) or vector(0)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "Running"
         }
       ],
       "fieldConfig": {
@@ -233,16 +232,11 @@
             "mode": "absolute",
             "steps": [
               {
+                "color": "red"
+              },
+              {
                 "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
+                "value": 1
               }
             ]
           }
@@ -263,9 +257,9 @@
     },
     {
       "id": 5,
-      "title": "Configured project states",
+      "title": "Configured project status",
       "description": "",
-      "type": "state-timeline",
+      "type": "table",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -280,50 +274,65 @@
         {
           "expr": "kali_cc_project_state",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "",
+          "instant": true,
+          "format": "table"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "palette-classic"
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
           },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          }
+          "mappings": []
         },
         "overrides": []
       },
       "options": {
-        "legend": {
-          "showLegend": true,
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Project",
+            "desc": false
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "cluster": true,
+              "container": true,
+              "endpoint": true,
+              "instance": true,
+              "job": true,
+              "namespace": true,
+              "pod": true,
+              "service": true
+            },
+            "indexByName": {
+              "project": 0,
+              "state": 1
+            },
+            "renameByName": {
+              "project": "Project",
+              "state": "State"
+            }
+          }
         }
-      }
+      ]
     },
     {
       "id": 6,
-      "title": "Monitoring targets up",
+      "title": "Prometheus scrape targets",
       "description": "",
       "type": "timeseries",
       "datasource": {
@@ -338,9 +347,14 @@
       },
       "targets": [
         {
-          "expr": "sum by(job) (up)",
+          "expr": "sum by (job) (up)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{job}} up"
+        },
+        {
+          "expr": "count by (job) (up) - sum by (job) (up)",
+          "refId": "B",
+          "legendFormat": "{{job}} down"
         }
       ],
       "fieldConfig": {
@@ -353,16 +367,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
+                "color": "green"
               },
               {
                 "color": "red",
-                "value": 90
+                "value": 1
               }
             ]
           }
@@ -398,9 +407,9 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_systemd_failed_units",
+          "expr": "kali_cc_systemd_failed_units or vector(0)",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "Failed units"
         }
       ],
       "fieldConfig": {
@@ -413,16 +422,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
+                "color": "green"
               },
               {
                 "color": "red",
-                "value": 90
+                "value": 1
               }
             ]
           }
@@ -460,7 +464,7 @@
         {
           "expr": "kali_cc_health_check_up",
           "refId": "A",
-          "legendFormat": "{{project}} {{container}} {{state}} {{device}} {{mountpoint}}"
+          "legendFormat": "{{project}} \u00b7 {{check}}"
         }
       ],
       "fieldConfig": {
@@ -473,16 +477,11 @@
             "mode": "absolute",
             "steps": [
               {
+                "color": "red"
+              },
+              {
                 "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
+                "value": 1
               }
             ]
           }
@@ -499,6 +498,63 @@
           "mode": "multi",
           "sort": "desc"
         }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Docker containers stopped",
+      "description": "",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 32
+      },
+      "targets": [
+        {
+          "expr": "count(docker_container_running == 0) or vector(0)",
+          "refId": "A",
+          "legendFormat": "Stopped"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "graphMode": "none",
+        "colorMode": "value"
       }
     }
   ],

@@ -12,7 +12,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 41,
-  "version": 2,
+  "version": 3,
   "refresh": "30s",
   "time": {
     "from": "now-24h",
@@ -75,7 +75,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(docker_container_info)",
+          "expr": "count(docker_container_info{name=~\"$container\"}) or vector(0)",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
@@ -120,7 +120,8 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto"
-      }
+      },
+      "description": "Respects the Container dashboard selector."
     },
     {
       "id": 21,
@@ -137,7 +138,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(docker_container_running)",
+          "expr": "sum(docker_container_running{name=~\"$container\"}) or vector(0)",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
@@ -182,7 +183,8 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto"
-      }
+      },
+      "description": "Respects the Container dashboard selector."
     },
     {
       "id": 22,
@@ -199,7 +201,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(docker_container_info) - sum(docker_container_running)",
+          "expr": "(count(docker_container_info{name=~\"$container\"}) or vector(0)) - (sum(docker_container_running{name=~\"$container\"}) or vector(0))",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
@@ -225,6 +227,10 @@
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           }
@@ -244,7 +250,8 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto"
-      }
+      },
+      "description": "Respects the Container dashboard selector."
     },
     {
       "id": 23,
@@ -261,7 +268,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(docker_container_memory_usage_bytes)",
+          "expr": "sum(docker_container_memory_usage_bytes{name=~\"$container\"}) or vector(0)",
           "legendFormat": "__auto",
           "range": false,
           "instant": true,
@@ -306,7 +313,8 @@
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto"
-      }
+      },
+      "description": "Respects the Container dashboard selector."
     },
     {
       "datasource": {
@@ -398,7 +406,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "docker_container_cpu_percent{name=~\"$container\"}",
+          "expr": "max by (name) (docker_container_running{name=~\"$container\"})",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -406,7 +414,8 @@
         }
       ],
       "title": "CPU usage by container",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Running=1 and stopped=0. Container ID labels are aggregated by name so recreated containers do not create duplicate history rows."
     },
     {
       "datasource": {
@@ -495,7 +504,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "docker_container_memory_usage_bytes{name=~\"$container\"}",
+          "expr": "max by (name) (docker_container_cpu_percent{name=~\"$container\"})",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -503,7 +512,8 @@
         }
       ],
       "title": "Memory usage by container",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "CPU usage percent per container, grouped by name across container ID changes."
     },
     {
       "datasource": {
@@ -592,7 +602,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "docker_container_memory_percent{name=~\"$container\"}",
+          "expr": "max by (name) (docker_container_memory_percent{name=~\"$container\"})",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -600,7 +610,8 @@
         }
       ],
       "title": "Memory limit used by container",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Memory percentage per container, grouped by name across container ID changes."
     },
     {
       "datasource": {
@@ -692,7 +703,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_network_receive_bytes_total{name=~\"$container\"}[$__rate_interval])",
+          "expr": "sum by (name) (rate(docker_container_network_receive_bytes_total{name=~\"$container\"}[$__rate_interval]))",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -700,7 +711,8 @@
         }
       ],
       "title": "Network receive rate",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Network byte rate per container. Counter resets from container restarts are handled by rate(), and container ID series are grouped by name."
     },
     {
       "datasource": {
@@ -792,7 +804,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_network_transmit_bytes_total{name=~\"$container\"}[$__rate_interval])",
+          "expr": "sum by (name) (rate(docker_container_network_transmit_bytes_total{name=~\"$container\"}[$__rate_interval]))",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -800,7 +812,8 @@
         }
       ],
       "title": "Network transmit rate",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Network byte rate per container. Counter resets from container restarts are handled by rate(), and container ID series are grouped by name."
     },
     {
       "datasource": {
@@ -892,7 +905,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_block_read_bytes_total{name=~\"$container\"}[$__rate_interval])",
+          "expr": "sum by (name) (rate(docker_container_block_read_bytes_total{name=~\"$container\"}[$__rate_interval]))",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -900,7 +913,8 @@
         }
       ],
       "title": "Block device read rate",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Block I/O byte rate per container. Counter resets from container restarts are handled by rate(), and container ID series are grouped by name."
     },
     {
       "datasource": {
@@ -992,7 +1006,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(docker_container_block_write_bytes_total{name=~\"$container\"}[$__rate_interval])",
+          "expr": "sum by (name) (rate(docker_container_block_write_bytes_total{name=~\"$container\"}[$__rate_interval]))",
           "legendFormat": "{{name}}",
           "range": true,
           "instant": false,
@@ -1000,7 +1014,8 @@
         }
       ],
       "title": "Block device write rate",
-      "type": "timeseries"
+      "type": "timeseries",
+      "description": "Block I/O byte rate per container. Counter resets from container restarts are handled by rate(), and container ID series are grouped by name."
     },
     {
       "id": 8,
@@ -1056,7 +1071,8 @@
         "footer": {
           "show": false
         }
-      }
+      },
+      "description": "Container inventory for the selected container names, including image, current state, status text, ports, and container ID."
     },
     {
       "id": 9,
