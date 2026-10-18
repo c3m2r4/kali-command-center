@@ -3,11 +3,10 @@
   "title": "DevSecOps Control Plane Advanced",
   "description": "Unified Kubernetes, container, monitoring, and security operations view for the kind-devsecops cluster. Use the dashboard links for component-level investigation.",
   "tags": [
+    "command-center",
     "devsecops",
     "kubernetes",
-    "docker",
-    "security",
-    "observability"
+    "security"
   ],
   "schemaVersion": 41,
   "version": 1,

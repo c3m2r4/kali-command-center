@@ -470,8 +470,9 @@
   "refresh": "",
   "schemaVersion": 41,
   "tags": [
-    "devsecops",
-    "observability"
+    "grafana",
+    "observability",
+    "operations"
   ],
   "templating": {
     "list": [

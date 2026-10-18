@@ -1,0 +1,38 @@
+{
+  "change_event_ttl_seconds": 900,
+  "max_inventory_rows": 2048,
+  "expected_listeners": [
+    {"protocol": "tcp", "port": 22, "service": "OpenSSH"},
+    {"protocol": "tcp", "port": 3306, "service": "MariaDB"},
+    {"protocol": "tcp", "port": 8443, "service": "Kubernetes Dashboard forward"},
+    {"protocol": "tcp", "port": 9443, "service": "Portainer"},
+    {"protocol": "tcp", "port": 13000, "service": "Grafana forward"},
+    {"protocol": "tcp", "port": 18765, "service": "DBCC"},
+    {"protocol": "tcp", "port": 19090, "service": "Prometheus forward"},
+    {"protocol": "tcp", "port": 42625, "service": "Kind API"},
+    {"protocol": "udp", "port": 53, "service": "Unbound DNS"},
+    {"protocol": "udp", "port": 67, "service": "DHCP on pan1"}
+  ],
+  "ports": {
+    "tcp:4500": {"application_name": "Floci UI", "browser_url": "http://localhost:4500/"},
+    "tcp:7443": {"application_name": "Mythic", "browser_url": "https://localhost:7443/new/login"},
+    "tcp:8025": {"application_name": "Mailpit", "browser_url": "http://localhost:8025/"},
+    "tcp:8081": {"application_name": "Unidentified HTTP listener", "browser_url": "http://localhost:8081/"},
+    "tcp:8443": {"application_name": "Kubernetes Dashboard", "browser_url": "https://localhost:8443/"},
+    "tcp:9443": {"application_name": "Portainer", "browser_url": "https://localhost:9443/"},
+    "tcp:13000": {"application_name": "Grafana", "browser_url": "http://localhost:13000/"},
+    "tcp:18765": {"application_name": "Database Command Center", "browser_url": "http://127.0.0.1:18765/"},
+    "tcp:19090": {"application_name": "Prometheus", "browser_url": "http://localhost:19090/graph"},
+    "tcp:19999": {"application_name": "Netdata", "browser_url": "http://localhost:19999/"}
+  },
+  "processes": {
+    "sshd": {"application_name": "OpenSSH"},
+    "mariadbd": {"application_name": "MariaDB"},
+    "mysqld": {"application_name": "MariaDB"},
+    "uvicorn": {"application_name": "Python web application"},
+    "nginx": {"application_name": "Nginx"},
+    "prometheus": {"application_name": "Prometheus"},
+    "grafana": {"application_name": "Grafana"},
+    "netdata": {"application_name": "Netdata"}
+  }
+}

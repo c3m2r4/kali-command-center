@@ -1,0 +1,287 @@
+{
+  "id": null,
+  "uid": "kali-sentinel-services",
+  "title": "Kali Sentinel | Service Catalog & Health",
+  "tags": [
+    "kali-sentinel",
+    "services",
+    "inventory"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Catalog scope",
+      "type": "text",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "The live table below reports actual health-check metrics. Its labels include the probe target; successful TCP checks mean reachability only. The inventory table lists every discovered service and links only verified browser UIs. Availability shown there is discovery evidence, not a continuously refreshed probe."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Service health checks",
+      "type": "table",
+      "description": "Kali Command Center health-check metrics.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 11
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "kali_cc_health_check_up",
+          "refId": "A",
+          "legendFormat": "{{project}} / {{check}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "HTTP status from instrumented health checks",
+      "type": "table",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "kali_cc_health_check_status_code{type=\"http\"}",
+          "refId": "A",
+          "legendFormat": "{{project}} / {{check}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Health-check response time",
+      "type": "timeseries",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "kali_cc_health_check_response_seconds",
+          "refId": "A",
+          "legendFormat": "{{project}} / {{check}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Port-forwarded monitoring interfaces",
+      "type": "text",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "[Grafana](http://localhost:13000/) \u00b7 [Prometheus](http://localhost:19090/graph) \u00b7 [DBCC](http://127.0.0.1:18765/) \u00b7 [Kubernetes Dashboard](https://localhost:8443/) \u00b7 [Portainer](https://localhost:9443/) \u00b7 [Netdata](http://localhost:19999/). Kubernetes links require their forwards. Local HTTPS certificate trust was not verified."
+      }
+    },
+    {
+      "id": 6,
+      "title": "Discovered services and verified browser URLs",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 28
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Complete discovered service inventory\n\n| Service | Verified browser UI | Discovery status |\n|---|---|---|\n| grafana | [Grafana 13.1.0](http://localhost:13000/) | /api/health HTTP 200 |\n| prometheus | [Prometheus 3.12.0](http://localhost:19090/graph) | API responds; DBCC target up |\n| kubernetes-dashboard | [Kubernetes Dashboard](https://localhost:8443/) | HTTP 200; TLS unverified |\n| dbcc | [DBCC Uvicorn application](http://127.0.0.1:18765/) | /api/health HTTP 200 |\n| dbcc-relay | No web UI discovered | Prometheus target UP |\n| mariadb | No web UI discovered | Active; audit ON at runtime; not persistent |\n| mythic-postgres | No web UI discovered | Container healthy |\n| hackafrica-redis | No web UI discovered | PING PONG; healthy |\n| mythic-rabbitmq | No web UI discovered | Container healthy |\n| dbcc-sqlite | No web UI discovered | DBCC responds |\n| portainer | [Portainer CE](https://localhost:9443/) | HTTP 200; TLS unverified |\n| netdata | [Netdata 2.11 nightly](http://localhost:19999/) | HTTP 200 |\n| falco | No web UI discovered | Pod running; metrics scraped |\n| trivy-operator | No web UI discovered | Running; vulnerability metrics |\n| floci-ui | [Floci UI](http://localhost:4500/) | HTTP 200 |\n| floci-local-api | No web UI discovered | Container healthy; root XML; routes unverified |\n| floci-proxy | No web UI discovered | Root returns XML |\n| floci-azure | No web UI discovered | Container healthy; UI unknown |\n| floci-gcp | No web UI discovered | Container healthy; UI unknown |\n| mythic-ui | [Mythic](https://localhost:7443/new/login) | HTTP 200; self-issued/no-SAN certificate |\n| mythic-jupyter | No web UI discovered | Container healthy |\n| mythic-react | No web UI discovered | Container healthy |\n| mythic-graphql | No web UI discovered | Container healthy |\n| mythic-server | No web UI discovered | Container healthy |\n| mythic-docs | No web UI discovered | Container healthy |\n| mythic-agent-containers | No web UI discovered | Seven containers running; no direct published ports |\n| hackafrica-api | No web UI discovered | Restarting; no verified UI |\n| hackafrica-worker | No web UI discovered | Running |\n| mailpit | [Mailpit](http://localhost:8025/) | UI HTTP 200; healthy |\n| kube-api | No web UI discovered | API requires Kubernetes auth |\n| auditd | No web UI discovered | Active; rules not verified |\n| wazuh-agent | No web UI discovered | Active; manager/path scope unknown |\n| ssh | No web UI discovered | Active; firewall unverified |\n| unbound | No web UI discovered | Active |\n| listener-443 | No web UI discovered | Backend and route unverified |\n| listener-8081 | [Unknown listener](http://localhost:8081/) | HTTP 200 Under Construction; identity unknown |\n| llmnr | No web UI discovered | Listener observed |\n| netflow | No web UI discovered | Listener observed |\n| otel | No web UI discovered | Listener observed |\n| teamviewer | No web UI discovered | Listener observed |\n| vmware | No web UI discovered | Listener observed |\n| containerd | No web UI discovered | Listener observed |\n| vscode | No web UI discovered | Process association observed |\n| datadog-agent | No web UI discovered | Restarting/unhealthy |\n"
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "links": [
+    {
+      "title": "DBCC DAM records",
+      "url": "http://127.0.0.1:18765/",
+      "targetBlank": true,
+      "keepTime": true,
+      "includeVars": false
+    }
+  ]
+}

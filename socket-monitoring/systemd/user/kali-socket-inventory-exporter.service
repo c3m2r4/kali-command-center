@@ -1,0 +1,22 @@
+[Unit]
+Description=Kali socket inventory Prometheus exporter (unprivileged)
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Projects/kali-command-center/socket-monitoring
+Environment=PYTHONDONTWRITEBYTECODE=1
+UMask=0007
+ExecStart=/usr/bin/python3 %h/Projects/kali-command-center/socket-monitoring/exporter/socket_inventory_exporter.py --socket %h/.local/share/kali-socket-inventory/metrics.sock --state %h/.local/share/kali-socket-inventory/state.json --config %h/Projects/kali-command-center/socket-monitoring/config.json
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=no
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/kali-socket-inventory
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+LockPersonality=yes
+
+[Install]
+WantedBy=default.target

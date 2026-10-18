@@ -3,8 +3,9 @@
   "uid": "kali-alerts-reliability",
   "title": "Alerts and Reliability",
   "tags": [
-    "kali-command-center",
-    "local"
+    "alerts",
+    "kali",
+    "reliability"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

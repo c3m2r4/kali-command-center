@@ -3,8 +3,9 @@
   "uid": "kali-system-performance",
   "title": "Kali System Performance",
   "tags": [
-    "kali-command-center",
-    "local"
+    "kali",
+    "linux",
+    "performance"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

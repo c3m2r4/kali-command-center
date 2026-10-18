@@ -3,8 +3,9 @@
   "uid": "kali-services-ports",
   "title": "Services and Ports",
   "tags": [
-    "kali-command-center",
-    "local"
+    "kali",
+    "network",
+    "services"
   ],
   "timezone": "browser",
   "schemaVersion": 39,
@@ -124,7 +125,7 @@
     },
     {
       "id": 4,
-      "title": "HTTP response code",
+      "title": "HTTP response code (HTTP checks only)",
       "type": "table",
       "datasource": {
         "type": "prometheus",
@@ -138,7 +139,7 @@
       },
       "targets": [
         {
-          "expr": "kali_cc_health_check_status_code",
+          "expr": "kali_cc_health_check_status_code{type=\"http\"}",
           "refId": "A",
           "legendFormat": "{{unit}} {{project}} {{check}} {{container}} {{state}} {{job}}"
         }

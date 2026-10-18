@@ -3,8 +3,9 @@
   "uid": "kali-executive-overview",
   "title": "Kali Linux Executive Overview",
   "tags": [
-    "kali-command-center",
-    "local"
+    "command-center",
+    "kali",
+    "overview"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

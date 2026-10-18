@@ -2908,8 +2908,9 @@
   "refresh": "",
   "schemaVersion": 42,
   "tags": [
+    "cluster",
     "kubernetes",
-    "kubernetes-app"
+    "observability"
   ],
   "templating": {
     "list": [

@@ -3,8 +3,9 @@
   "uid": "kali-network-connectivity",
   "title": "Network and Connectivity",
   "tags": [
-    "kali-command-center",
-    "local"
+    "kali",
+    "network",
+    "operations"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

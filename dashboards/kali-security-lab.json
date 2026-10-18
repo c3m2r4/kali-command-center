@@ -3,8 +3,9 @@
   "uid": "kali-security-lab",
   "title": "Cybersecurity Lab Infrastructure",
   "tags": [
-    "kali-command-center",
-    "local"
+    "kali",
+    "lab",
+    "security"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

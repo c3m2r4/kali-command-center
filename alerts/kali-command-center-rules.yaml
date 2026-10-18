@@ -90,3 +90,66 @@ spec:
       annotations:
         summary: A registered project is degraded
         description: '{{ $labels.project }} has a failing local health check or restarting container.'
+    - alert: KaliSentinelDBCCCollectorHeartbeatStale
+      expr: up{job="dbcc-dam-metrics"} == 1 unless on(instance) (dbcc_dam_collector_heartbeat_timestamp_seconds{job="dbcc-dam-metrics"} > time() - 90)
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: DBCC metrics scrape is healthy but its collector heartbeat is stale
+        description: 'The DBCC endpoint responds, but its collector heartbeat is missing or older than 90 seconds. This does not validate MariaDB audit-plugin state or event completeness.'
+        runbook_url: 'http://localhost:13000/d/kali-sentinel-audit-health/audit-monitoring-health'
+    - alert: KaliSocketInventoryExporterDown
+      expr: up{job="kali-socket-inventory"} == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: Kali socket inventory exporter is unreachable
+        description: Prometheus cannot scrape the host socket inventory exporter at the Kind node endpoint.
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
+    - alert: KaliSocketInventoryCollectionFailed
+      expr: kali_socket_inventory_scrape_success{job="kali-socket-inventory"} == 0
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: Kali socket inventory collection failed
+        description: The exporter is reachable but the ss inventory command failed.
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
+    - alert: KaliUnexpectedListeningPort
+      expr: kali_socket_listener_change{job="kali-socket-inventory",change="new",protocol="tcp"} == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: A new TCP listening port was detected
+        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) opened TCP port {{ $labels.local_port }} on {{ $labels.local_address }}.'
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
+    - alert: KaliImportantListenerDisappeared
+      expr: kali_socket_listener_expected_up{job="kali-socket-inventory"} == 0
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: An important configured listener is absent
+        description: '{{ $labels.expected_service }} expected on {{ $labels.protocol }} port {{ $labels.local_port }} is not present in the current inventory.'
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
+    - alert: KaliNewWildcardListener
+      expr: kali_socket_listener_change{job="kali-socket-inventory",change="new",exposure="wildcard",protocol="tcp"} == 1
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: A new wildcard-bound TCP listener needs exposure review
+        description: '{{ $labels.process_name }} (PID {{ $labels.pid }}) newly bound TCP port {{ $labels.local_port }} to {{ $labels.local_address }}.'
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets
+    - alert: KaliSocketInventoryTruncated
+      expr: kali_socket_inventory_truncated{job="kali-socket-inventory"} == 1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Socket inventory reached its row cap
+        description: Current listener counts and change detection may be incomplete; review max_inventory_rows.
+        runbook_url: http://localhost:13000/d/kali-sentinel-sockets/kali-sentinel-listening-sockets

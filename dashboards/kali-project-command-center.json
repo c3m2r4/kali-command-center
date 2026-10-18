@@ -3,8 +3,9 @@
   "uid": "kali-project-command-center",
   "title": "Project Command Center",
   "tags": [
-    "kali-command-center",
-    "local"
+    "kali",
+    "operations",
+    "projects"
   ],
   "timezone": "browser",
   "schemaVersion": 39,

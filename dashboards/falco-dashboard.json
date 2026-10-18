@@ -3,10 +3,9 @@
   "title": "Falco Dashboard",
   "tags": [
     "falco",
-    "security",
     "kubernetes",
-    "devsecops",
-    "observability"
+    "runtime-security",
+    "security"
   ],
   "timezone": "browser",
   "schemaVersion": 41,

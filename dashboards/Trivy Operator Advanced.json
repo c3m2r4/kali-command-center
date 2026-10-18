@@ -2,9 +2,10 @@
   "uid": "trivy-operator-overview",
   "title": "Trivy Operator Security Posture & Vulnerability Intelligence",
   "tags": [
-    "trivy",
+    "kubernetes",
     "security",
-    "kubernetes"
+    "trivy",
+    "vulnerability-management"
   ],
   "timezone": "browser",
   "schemaVersion": 41,

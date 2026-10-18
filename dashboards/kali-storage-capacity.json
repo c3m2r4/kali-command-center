@@ -3,8 +3,9 @@
   "uid": "kali-storage-capacity",
   "title": "Storage and Project Capacity",
   "tags": [
-    "kali-command-center",
-    "local"
+    "capacity",
+    "kali",
+    "storage"
   ],
   "timezone": "browser",
   "schemaVersion": 39,
